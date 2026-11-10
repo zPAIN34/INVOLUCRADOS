@@ -923,6 +923,11 @@ body:has(.tl6.on) .ev-tab,body:has(.tl6.on) .ev-toasts{display:none!important}
 .sel-screen>svg{filter:drop-shadow(-1.6px 0 rgba(255,40,30,.5)) drop-shadow(1.6px 0 rgba(40,150,255,.45))!important}
 #lvlBlink{filter:none!important}
 @media (prefers-reduced-motion:reduce){.n6-glitch .n2-stage,.n6-glitch .nt .ln{animation:none!important}}
+
+/* la [X] de los anuncios: área de clic más grande que el botón dibujado, y la capa del nivel se aplana para que el clic caiga donde se ve */
+.ad-x{position:relative}
+.ad-x::after{content:"";position:absolute;inset:-8px -8px -8px -10px}
+.n1,.n2,.nivel{transform-style:flat;isolation:isolate}
 </style>
 </head>
 <body>
@@ -1888,10 +1893,11 @@ async function n1Folder(){
 function drawFolder(){
   const Y=document.getElementById('n1Y');if(!Y)return;
   const pick=i=>{N1.year=i;drawFolder();n1Open(i)};
-  fillCol('n1Y',ARCH.map(a=>a.y),N1.year,'c',pick);fillCol('n1E',ARCH.map(a=>a.ext),N1.year,'c',pick);fillCol('n1D',ARCH.map(a=>a.d),N1.year,'',pick);
+  fillCol('n1Y',ARCH.map(a=>a.y),N1.year,'c',pick);fillCol('n1E',ARCH.map(a=>a.ext),N1.year,'c',pick);fillCol('n1D',ARCH.map(a=>a.d+((N1.vis&&N1.vis[a.y])?'  ✓':'')),N1.year,'',pick);
 }
 async function n1Open(i,quick){addEvid({'2006':'an06','2009':'fo09','2010':'bz10'}[ARCH[i].y]);
   const a=ARCH[i];N1.opened=i;
+  N1.vis=N1.vis||{};if(!N1.vis[a.y]){N1.vis[a.y]=true;drawFolder()}   // chulito: ya entró a este año
   if(a.audio){n1Audio();return}
   const out=document.getElementById('n1Out');if(!out)return;
   const id=++N1.run;N1.skip=!!quick;out.innerHTML='';
@@ -2471,7 +2477,9 @@ function n2Ads(id){
     const w=mk('div','ad');w.style.left=(x+Math.round(Math.random()*30-15))+'px';w.style.top=(y+Math.round(Math.random()*20-10))+'px';w.style.zIndex=20+i;
     const bar=mk('div','ad-bar');bar.appendChild(mk('span','',titles[i]));const x0=mk('button','ad-x','X');x0.setAttribute('aria-label','Cerrar anuncio');bar.appendChild(x0);w.appendChild(bar);
     const im=mk('img');im.src=AD_IMGS[i%2];im.alt='Anuncio';w.appendChild(im);
-    x0.onclick=e=>{e.stopPropagation();w.classList.add('bye');try{kcSnd('tick',.6)}catch(_){}setTimeout(()=>{w.remove();adLeft()},160)};
+    const adClose=e=>{if(e){e.preventDefault();e.stopPropagation()}if(w._closing)return;w._closing=true;w.classList.add('bye');try{kcSnd('tick',.6)}catch(_){}setTimeout(()=>{w.remove();adLeft()},160)};
+    x0.onpointerdown=adClose;   // se cierra al presionar (no espera a soltar): si la cámara se mueve un poco entre presionar y soltar, igual cierra
+    x0.onclick=adClose;         // teclado (ENTER/ESPACIO sobre la X)
     im.onclick=()=>{w.classList.remove('shake');void w.offsetWidth;w.classList.add('shake');sfxError()};   // el anuncio "trampa" no hace nada
     w.onpointerdown=()=>{w.style.zIndex=40+(++N2.adZ||0)};
     N2.adSp=(N2.adSp||0)+1;N2S().appendChild(w);sfxError(0,false);adLeft();   // cada anuncio que aparece suena con el error de siempre (ERROR.mp3)
@@ -2795,12 +2803,13 @@ function n3AllSeen(){return ARCH3.every(a=>N3.seen[a.y])}
 function drawFolder3(){
   if(!document.getElementById('n3Y'))return;const pick=i=>{N3.year=i;drawFolder3();n3Open(i)};
   fillCol('n3Y',ARCH3.map(a=>a.y),N3.year,'c',pick);fillCol('n3E',ARCH3.map(a=>a.ext),N3.year,'c',pick);
-  fillCol('n3D',ARCH3.map(a=>a.d+(N3.seen[a.y]?'  ✓':'')),N3.year,'',pick);
+  fillCol('n3D',ARCH3.map(a=>a.d+((N3.seen[a.y]||(N3.vis&&N3.vis[a.y]))?'  ✓':'')),N3.year,'',pick);
   const st=document.getElementById('n3St');
   if(n3AllSeen()){st.className='ln grn';st.textContent='[REGISTRO DE CAMPO 03 COMPLETO] · PULSE ESC PARA VOLVER AL SELECTOR'}
   else{st.className='ln';st.textContent='>REGISTROS PENDIENTES: '+ARCH3.filter(a=>!N3.seen[a.y]).map(a=>a.y).join(' · ')+'   ·   ESC: SALIR'}
 }
 async function n3Open(i,quick){addEvid({'2017':'ww17','2018':'jc18','2019':'gj19'}[ARCH3[i].y]);
+  N3.vis=N3.vis||{};if(!N3.vis[ARCH3[i].y]){N3.vis[ARCH3[i].y]=true;drawFolder3()}   // chulito: ya entró a este año
   const a=ARCH3[i],out=document.getElementById('n3Out');if(!out)return;
   const id=++N3.run;N3.skip=!!quick;out.innerHTML='';N3.screen='folder';
   await n3blocks([{t:`T:/ AÑOS / ${a.y}. TXT`},'gaps'],id,out);if(id!==N3.run)return;
