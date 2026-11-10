@@ -317,15 +317,15 @@ body{font-family:"JetBrains Mono",ui-monospace,monospace;color:var(--or)}
 .pz-t.over{outline:2px dashed #FFD21A!important}
 .pz.done .pz-t{outline:none!important;transform:none}
 /* anuncios falsos (ventanas emergentes) */
-.ad{position:absolute;width:380px;background:#c3c3c3;border:2px solid;border-color:#fff #404040 #404040 #fff;box-shadow:2px 2px 0 #000,6px 8px 18px rgba(0,0,0,.5);
+.pop{position:absolute;width:380px;background:#c3c3c3;border:2px solid;border-color:#fff #404040 #404040 #fff;box-shadow:2px 2px 0 #000,6px 8px 18px rgba(0,0,0,.5);
   animation:adIn .22s steps(3,end) both;text-shadow:none}
-.ad-bar{display:flex;justify-content:space-between;align-items:center;height:22px;padding:0 3px 0 7px;background:linear-gradient(90deg,#000080,#1084d0);color:#fff;
+.pop-bar{display:flex;justify-content:space-between;align-items:center;height:22px;padding:0 3px 0 7px;background:linear-gradient(90deg,#000080,#1084d0);color:#fff;
   font:700 11px "JetBrains Mono",monospace;letter-spacing:.04em}
-.ad-x{width:18px;height:16px;padding:0;background:#c3c3c3;border:2px solid;border-color:#fff #404040 #404040 #fff;font:700 11px/10px "JetBrains Mono",monospace;color:#000;cursor:pointer}
-.ad-x:active{border-color:#404040 #fff #fff #404040}
-.ad img{display:block;width:372px;height:210px;margin:2px;cursor:pointer}
-.ad.shake{animation:n1shake .35s}
-.ad.bye{animation:adOut .16s steps(2,end) forwards}
+.pop-x{width:18px;height:16px;padding:0;background:#c3c3c3;border:2px solid;border-color:#fff #404040 #404040 #fff;font:700 11px/10px "JetBrains Mono",monospace;color:#000;cursor:pointer}
+.pop-x:active{border-color:#404040 #fff #fff #404040}
+.pop img{display:block;width:372px;height:210px;margin:2px;cursor:pointer}
+.pop.shake{animation:n1shake .35s}
+.pop.bye{animation:adOut .16s steps(2,end) forwards}
 @keyframes adIn{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
 @keyframes adOut{to{transform:scale(.4);opacity:0}}
 /* ---- nivel 4 ---- */
@@ -925,8 +925,8 @@ body:has(.tl6.on) .ev-tab,body:has(.tl6.on) .ev-toasts{display:none!important}
 @media (prefers-reduced-motion:reduce){.n6-glitch .n2-stage,.n6-glitch .nt .ln{animation:none!important}}
 
 /* la [X] de los anuncios: área de clic más grande que el botón dibujado, y la capa del nivel se aplana para que el clic caiga donde se ve */
-.ad-x{position:relative}
-.ad-x::after{content:"";position:absolute;inset:-8px -8px -8px -10px}
+.pop-x{position:relative}
+.pop-x::after{content:"";position:absolute;inset:-8px -8px -8px -10px}
 .n1,.n2,.nivel{transform-style:flat;isolation:isolate}
 </style>
 </head>
@@ -2474,9 +2474,9 @@ function n2Ads(id){
   const titles=['¡¡FELICIDADES!!.EXE','GANADOR_OFICIAL.EXE','OFERTA_UNICA.EXE','PREMIO_RECLAMAR.EXE','¡¡NO ES BROMA!!.EXE','GIFTCARD_500.EXE'];
   AD_POS.forEach(([x,y],i)=>setTimeout(()=>{
     if(id!==N2.run)return;
-    const w=mk('div','ad');w.style.left=(x+Math.round(Math.random()*30-15))+'px';w.style.top=(y+Math.round(Math.random()*20-10))+'px';w.style.zIndex=20+i;
-    const bar=mk('div','ad-bar');bar.appendChild(mk('span','',titles[i]));const x0=mk('button','ad-x','X');x0.setAttribute('aria-label','Cerrar anuncio');bar.appendChild(x0);w.appendChild(bar);
-    const im=mk('img');im.src=AD_IMGS[i%2];im.alt='Anuncio';w.appendChild(im);
+    const w=mk('div','pop');w.style.left=(x+Math.round(Math.random()*30-15))+'px';w.style.top=(y+Math.round(Math.random()*20-10))+'px';w.style.zIndex=20+i;
+    const bar=mk('div','pop-bar');bar.appendChild(mk('span','',titles[i]));const x0=mk('button','pop-x','X');x0.setAttribute('aria-label','Cerrar ventana');bar.appendChild(x0);w.appendChild(bar);
+    const im=mk('img');im.src=AD_IMGS[i%2];im.alt='Ventana emergente';w.appendChild(im);
     const adClose=e=>{if(e){e.preventDefault();e.stopPropagation()}if(w._closing)return;w._closing=true;w.classList.add('bye');try{kcSnd('tick',.6)}catch(_){}setTimeout(()=>{w.remove();adLeft()},160)};
     x0.onpointerdown=adClose;   // se cierra al presionar (no espera a soltar): si la cámara se mueve un poco entre presionar y soltar, igual cierra
     x0.onclick=adClose;         // teclado (ENTER/ESPACIO sobre la X)
@@ -2485,7 +2485,7 @@ function n2Ads(id){
     N2.adSp=(N2.adSp||0)+1;N2S().appendChild(w);sfxError(0,false);adLeft();   // cada anuncio que aparece suena con el error de siempre (ERROR.mp3)
   },500+i*380));
 }
-function adLeft(){const m=document.getElementById('n2BarMsg'),n=N2S().querySelectorAll('.ad').length;
+function adLeft(){const m=document.getElementById('n2BarMsg'),n=N2S().querySelectorAll('.pop').length;
   if(!n&&N2.screen==='bars'&&N2.adSp>=AD_POS.length&&AU2S.on&&!AU2S.started){AU2S.started=true;clearTimeout(AU2S.t);AU2S.t=setTimeout(au2Play,700)}
   if(N2.screen==='bars'&&m&&!m.classList.contains('ch-g'))m.textContent=n?`CIERRE LOS ANUNCIOS PARA CONTINUAR · QUEDAN ${n}`:'ARRASTRE CADA BARRA CON EL MOUSE O USE LAS FLECHAS: ← → PARA ELEGIR Y ↑ ↓ PARA AJUSTAR'}
 /* ---------- audio de la terminal de reconstrucción (CHATEALO · "AUDIO RECUPERADO: ???????.MP3") ----------
@@ -2546,7 +2546,7 @@ function barCheck(){
 }
 function n2BarsKey(e){
   if(!N2.ready||!N2.bars)return true;
-  if(N2S().querySelector('.ad'))return true;const k=e.key;const adj=[0,2,3,4].filter(i=>N2.bars[i].t!==null);
+  if(N2S().querySelector('.pop'))return true;const k=e.key;const adj=[0,2,3,4].filter(i=>N2.bars[i].t!==null);
   if(k==='ArrowRight'||k==='ArrowLeft'){let j=adj.indexOf(N2.barSel);j=(j+(k==='ArrowRight'?1:-1)+adj.length)%adj.length;N2.barSel=adj[j];drawBars();return true}
   if(k==='ArrowUp'||k==='ArrowDown'){const x=N2.bars[N2.barSel];x.v=Math.max(1,Math.min(BMAX,x.v+(k==='ArrowUp'?1:-1)*(e.shiftKey?5:1)));drawBars();barCheck();return true}
   return false;
